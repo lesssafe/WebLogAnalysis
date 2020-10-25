@@ -17,15 +17,15 @@ def search(search_key,search_value):
     for line in weblog:
         re_result=reobj.match(line)
         re_arry=re_result.groupdict()
-        ip_add=requests.get("http://whois.pconline.com.cn/ipJson.jsp?ip="+re_arry['ip'])
-        re_ipadd = re.findall(r'"addr":"(.*?)","regionNames"', ip_add.text)
         if search_key == 'request':
             if search_value in re_arry['request']:
                 row=row+1
+                re_ipadd = ipsearch(re_arry['ip'])
                 write_xls(re_ipadd,re_arry['ip'],re_arry['time'],re_arry['request'],re_arry['status'],re_arry['bytes'],re_arry['referer'],re_arry['ua'],row)
         else:
             if re_arry[search_key]==search_value:
                 row = row + 1
+                re_ipadd = ipsearch(re_arry['ip'])
                 write_xls(re_ipadd,re_arry['ip'],re_arry['time'],re_arry['request'],re_arry['status'],re_arry['bytes'],re_arry['referer'],re_arry['ua'],row)
     workbook.save("lesssafe.xls")
 def write_xls(re_ipadd,ip,time,request,status,bytes,referer,ua,row):
@@ -37,7 +37,10 @@ def write_xls(re_ipadd,ip,time,request,status,bytes,referer,ua,row):
     worksheet.write(row, 5, bytes)
     worksheet.write(row, 6, referer)
     worksheet.write(row, 7, ua)
-
+def ipsearch(ip):
+    ip_add = requests.get("http://whois.pconline.com.cn/ipJson.jsp?ip=" + ip)
+    re_ipadd = re.findall(r'"addr":"(.*?)","regionNames"', ip_add.text)
+    return re_ipadd
 if __name__ == '__main__':
     print("————LessSafe安全团队web日志分析工具————")
     print("———————请选择你输入需要搜索的选项———————")
